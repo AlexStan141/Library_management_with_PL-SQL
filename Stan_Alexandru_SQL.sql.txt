@@ -1,0 +1,970 @@
+--4
+
+CREATE TABLE persoana(id_persoana NUMBER(5) PRIMARY KEY NOT NULL,
+                      nume VARCHAR2(15) NOT NULL,
+                      prenume VARCHAR2(15) NOT NULL,
+                      data_nasterii DATE NOT NULL,
+                      judet VARCHAR2(15) NOT NULL,
+                      oras VARCHAR2(15) NOT NULL,
+                      adresa VARCHAR2(50) NOT NULL,
+                      cod_permis NUMBER(8));
+                      
+CREATE TABLE student( id_persoana NUMBER(5) PRIMARY KEY NOT NULL,
+                      an NUMBER(3) NOT NULL,
+                      profil VARCHAR2(15) NOT NULL,
+                      specializare VARCHAR2(15) NOT NULL,
+		      nivel VARCHAR2(15) NOT NULL,
+                      nr_matricol VARCHAR2(10) NOT NULL);
+                      
+CREATE TABLE angajat(id_persoana NUMBER(5) PRIMARY KEY NOT NULL,
+                      job_id NUMBER(5) NOT NULL,
+                      data_start DATE NOT NULL,
+                      salariu NUMBER(7) NOT NULL,
+                      numar_legitimatie NUMBER(8) NOT NULL);
+                      
+CREATE TABLE bibliotecar(id_persoana NUMBER(5) PRIMARY KEY NOT NULL);
+                      
+CREATE TABLE job(job_id NUMBER(5) PRIMARY KEY NOT NULL,
+                 nume_job VARCHAR2(15) NOT NULL,
+                 salariu_minim NUMBER(7) NOT NULL,
+                 salariu_maxim NUMBER(7) NOT NULL);
+                 
+CREATE TABLE istorie_joburi(job_id NUMBER(5) NOT NULL,
+                            id_persoana NUMBER(5) NOT NULL,
+                            data_start DATE NOT NULL,
+                            data_end DATE NOT NULL,
+                            PRIMARY KEY(job_id,id_persoana,data_start));
+                            
+CREATE TABLE carte(id_carte NUMBER(8) PRIMARY KEY NOT NULL,
+                   titlu VARCHAR2(35) NOT NULL,
+                   autor VARCHAR2(35) NOT NULL,
+                   categorie VARCHAR2(15) NOT NULL,
+                   editura VARCHAR2(15) NOT NULL);
+                   
+CREATE TABLE imprumuta(id_persoana NUMBER(5) NOT NULL,
+                       id_carte NUMBER(8) NOT NULL,
+                       data_imprumut DATE NOT NULL,
+                       data_returnare DATE,
+                       PRIMARY KEY(id_persoana,id_carte,data_imprumut));
+                       
+CREATE TABLE carnet_student(nr_matricol VARCHAR2(10) PRIMARY KEY NOT NULL,
+                            data_eliberare DATE NOT NULL,
+                            vizat VARCHAR2(3) NOT NULL);
+                            
+CREATE TABLE legitimatie_serviciu(nr_legitimatie NUMBER(8) PRIMARY KEY NOT NULL,
+                                  data_eliberare DATE NOT NULL);
+                                  
+CREATE TABLE permis(cod_permis NUMBER(8) PRIMARY KEY NOT NULL,
+                    data_eliberare DATE NOT NULL);
+                    
+CREATE TABLE istorie_permise(cod_permis NUMBER(8) NOT NULL,
+                             id_persoana NUMBER(5) NOT NULL,
+                             data_pierdere DATE NOT NULL,
+                             PRIMARY KEY(cod_permis,id_persoana,data_pierdere));
+                             
+CREATE TABLE da(id_bibliotecar NUMBER(5) NOT NULL,
+                cod_permis NUMBER(8) NOT NULL,
+                id_persoana NUMBER(5) NOT NULL,
+                PRIMARY KEY(id_bibliotecar,cod_permis,id_persoana));
+                                        
+
+
+
+
+ALTER TABLE imprumuta
+ADD CONSTRAINT fk_imp_id_persoana
+FOREIGN KEY (id_persoana) REFERENCES persoana(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE imprumuta
+ADD CONSTRAINT fk_imp_id_carte
+FOREIGN KEY (id_carte) REFERENCES carte(id_carte) ON DELETE CASCADE;
+
+ALTER TABLE student
+ADD CONSTRAINT fk_nr_matricol
+FOREIGN KEY (nr_matricol) REFERENCES carnet_student(nr_matricol) ON DELETE CASCADE;
+
+ALTER TABLE angajat
+ADD CONSTRAINT fk_numar_legitimatie
+FOREIGN KEY (numar_legitimatie) REFERENCES legitimatie_serviciu(nr_legitimatie) ON DELETE CASCADE; 
+
+ALTER TABLE persoana
+ADD CONSTRAINT fk_cod_permis
+FOREIGN KEY (cod_permis) REFERENCES permis(cod_permis) ON DELETE CASCADE;
+
+ALTER TABLE angajat
+ADD CONSTRAINT fk_job_id
+FOREIGN KEY (job_id) REFERENCES job(job_id) ON DELETE CASCADE;
+
+ALTER TABLE istorie_joburi
+ADD CONSTRAINT fk_ist_job
+FOREIGN KEY (job_id) REFERENCES job(job_id) ON DELETE CASCADE;
+
+ALTER TABLE istorie_joburi
+ADD CONSTRAINT fk_ist_ang
+FOREIGN KEY (id_persoana) REFERENCES angajat(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE istorie_permise
+ADD CONSTRAINT fk_istp_cod
+FOREIGN KEY (cod_permis) REFERENCES permis(cod_permis) ON DELETE CASCADE;
+
+ALTER TABLE istorie_permise
+ADD CONSTRAINT fk_istp_pers
+FOREIGN KEY (id_persoana) REFERENCES persoana(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE da
+ADD CONSTRAINT fk_da_bibl
+FOREIGN KEY(id_bibliotecar) REFERENCES bibliotecar(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE da
+ADD CONSTRAINT fk_da_perm
+FOREIGN KEY(cod_permis) REFERENCES permis(cod_permis) ON DELETE CASCADE;
+
+ALTER TABLE da
+ADD CONSTRAINT fk_da_pers
+FOREIGN KEY(id_persoana) REFERENCES persoana(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE student
+ADD CONSTRAINT fk_st_per
+FOREIGN KEY(id_persoana) REFERENCES persoana(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE angajat
+ADD CONSTRAINT fk_ang_per
+FOREIGN KEY(id_persoana) REFERENCES persoana(id_persoana) ON DELETE CASCADE;
+
+ALTER TABLE bibliotecar
+ADD CONSTRAINT fk_bibl_ang
+FOREIGN KEY(id_persoana) REFERENCES angajat(id_persoana) ON DELETE CASCADE;
+
+
+
+
+
+
+--5.
+
+INSERT INTO carte
+VALUES(1,'Structuri de date in Python','George Chirila','Programare','Bella');
+INSERT INTO carte
+VALUES(2,'Latici si algebre booleene','Sergiu Rudeanu','Logica','Sofia');
+INSERT INTO carte
+VALUES(3,'Structuri in Java','Ionescu Macovei','Programare','Sofia');
+INSERT INTO carte
+VALUES(4,'Esentele matricilor','Bianca Sara','Matematica','Tabu');
+INSERT INTO carte
+VALUES(5,'Introducere in statistica','Ghinescu Maria','Programare','Cerna');
+INSERT INTO carte
+VALUES(6,'Structuri in Java','Gina Carena','Programare','Sopol');
+
+
+INSERT INTO carnet_student
+VALUES('12/412',TO_DATE('2019/10/15', 'yyyy/mm/dd'),'DA');
+INSERT INTO carnet_student
+VALUES('13/201',TO_DATE('2017/10/24', 'yyyy/mm/dd'),'DA');
+INSERT INTO carnet_student
+VALUES('11/206',TO_DATE('2016/10/18', 'yyyy/mm/dd'),'NU');
+INSERT INTO carnet_student
+VALUES('21/243',TO_DATE('2018/10/17', 'yyyy/mm/dd'),'NU');
+INSERT INTO carnet_student
+VALUES('15/206',TO_DATE('2019/10/18', 'yyyy/mm/dd'),'DA');
+INSERT INTO carnet_student
+VALUES('26/303',TO_DATE('2019/10/23', 'yyyy/mm/dd'),'NU');
+INSERT INTO carnet_student
+VALUES('25/413',TO_DATE('2019/10/24', 'yyyy/mm/dd'),'DA');
+
+INSERT INTO job
+VALUES(1,'Profesor POO',2500,5500);
+INSERT INTO job
+VALUES(2,'Profesor,PF',2000,5000);
+INSERT INTO job
+VALUES(3,'Bibliotecar',2000,4000);
+INSERT INTO job
+VALUES(4,'Secretar',2500,5000);
+
+
+
+INSERT INTO legitimatie_serviciu
+VALUES(1,TO_DATE('2001/01/25', 'yyyy/mm/dd'));
+INSERT INTO legitimatie_serviciu
+VALUES(2,TO_DATE('1997/06/20', 'yyyy/mm/dd'));
+INSERT INTO legitimatie_serviciu
+VALUES(3,TO_DATE('2000/04/18', 'yyyy/mm/dd'));
+INSERT INTO legitimatie_serviciu
+VALUES(4,TO_DATE('2002/06/19', 'yyyy/mm/dd'));
+INSERT INTO legitimatie_serviciu
+VALUES(5,TO_DATE('2000/04/18', 'yyyy/mm/dd'));
+INSERT INTO legitimatie_serviciu
+VALUES(6,TO_DATE('1996/10/22', 'yyyy/mm/dd'));
+
+INSERT INTO permis
+VALUES(1,TO_DATE('2008/04/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(2,TO_DATE('1980/12/08', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(3,TO_DATE('2019/11/19', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(4,TO_DATE('2019/10/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(5,TO_DATE('2017/10/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(6,TO_DATE('2016/10/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(7,TO_DATE('2001/06/22', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(8,TO_DATE('1997/06/20', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(9,TO_DATE('2002/06/19', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(10,TO_DATE('2000/04/18', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(11,TO_DATE('2019/10/11', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(12,TO_DATE('2017/10/12', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(13,TO_DATE('2019/12/12', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(14,TO_DATE('2018/10/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(15,TO_DATE('1999/01/13', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(16,TO_DATE('1996/10/22', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(17,TO_DATE('2019/10/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(18,TO_DATE('2019/10/03', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(19,TO_DATE('2019/10/10', 'yyyy/mm/dd'));
+INSERT INTO permis
+VALUES(20,TO_DATE('2019/10/11', 'yyyy/mm/dd'));
+
+
+INSERT INTO persoana
+VALUES(1,'Ionescu','Marian',TO_DATE('1988/03/12', 'yyyy/mm/dd'),'Ilfov','Privea','Str.Grivitei 12',1);
+INSERT INTO persoana
+VALUES(2,'Ana','Bianca',TO_DATE('1955/05/07', 'yyyy/mm/dd'),'Dolj','Moreni','Str.Avram nr.23',2);
+INSERT INTO persoana
+VALUES(3,'Matei','Sorin',TO_DATE('1999/04/08', 'yyyy/mm/dd'),'Covasna','Seva','Str.Marinarilor 11',13);
+INSERT INTO persoana
+VALUES(4,'Gina','Ioana',TO_DATE('1999/08/13', 'yyyy/mm/dd'),'Arges','Pari','Str.Morii nr.23',11);
+INSERT INTO persoana
+VALUES(5,'Petrel','Marius',TO_DATE('1997/05/14', 'yyyy/mm/dd'),'Mures','Sora','Str.Ceaiului 12',12);
+INSERT INTO persoana
+VALUES(6,'Cafa','Loredana',TO_DATE('1996/02/13', 'yyyy/mm/dd'),'Dambovita','Pucioasa','Str.Mariei nr.21',6);
+INSERT INTO persoana
+VALUES(7,'Chirila','Daniel',TO_DATE('1998/06/21', 'yyyy/mm/dd'),'Timis','Capalna','Str.Ionilor nr.34',14);
+INSERT INTO persoana
+VALUES(14,'Ilie','Florian',TO_DATE('1999/04/13', 'yyyy/mm/dd'),'Timis','Capalna','Str.Ionilor nr.34',19);
+INSERT INTO persoana
+VALUES(15,'Duta','Cecilia',TO_DATE('1999/07/16', 'yyyy/mm/dd'),'Timis','Capalna','Str.Ionilor nr.35',20);
+INSERT INTO persoana
+VALUES(8,'Stelea','Ion',TO_DATE('1972/06/19', 'yyyy/mm/dd'),'Ilfov','Bucuresti','Str.Grivita',7);
+INSERT INTO persoana
+VALUES(9,'Carta','Marcela',TO_DATE('1966/05/18', 'yyyy/mm/dd'),'Ifov','Bucuresti','Str.Bazilescu',8);
+INSERT INTO persoana
+VALUES(10,'Raluca','Ioana',TO_DATE('1967/09/19', 'yyyy/mm/dd'),'Arges','Striblea','Str.Ion',15);
+INSERT INTO persoana
+VALUES(11,'Ganea','Maria',TO_DATE('1972/06/19', 'yyyy/mm/dd'),'Cluj','Fera','Str.Mazilului nr.12',9);
+INSERT INTO persoana
+VALUES(12,'Lucerna','Andrei',TO_DATE('1970/04/18', 'yyyy/mm/dd'),'Harghita','Sopol','Strada Mocanitei',10);
+INSERT INTO persoana
+VALUES(13,'Marcela','Ioana',TO_DATE('1971/07/19', 'yyyy/mm/dd'),'Cluj','Fera','Str.Morii',16);
+
+
+INSERT INTO student
+VALUES(3,1,'MI','Matematica','Licenta','25/413');
+INSERT INTO student
+VALUES(4,1,'MI','Matematica','Licenta','12/412');
+INSERT INTO student
+VALUES(5,3,'MI','Informatica','Licenta','13/201');
+INSERT INTO student
+VALUES(6,1,'MI','CTI','Master','11/206');
+INSERT INTO student
+VALUES(7,1,'MI','Informatica','Licenta','21/243');
+INSERT INTO student
+VALUES(14,2,'MI','Informatica','Licenta','15/206');
+INSERT INTO student
+VALUES(15,1,'MI','Matematica','Licenta','26/303');
+
+INSERT INTO angajat
+VALUES(8,1,TO_DATE('2001/01/22', 'yyyy/mm/dd'),2750,1);
+INSERT INTO angajat
+VALUES(9,2,TO_DATE('1997/06/18', 'yyyy/mm/dd'),2100,2);
+INSERT INTO angajat
+VALUES(10,1,TO_DATE('2000/04/19', 'yyyy/mm/dd'),3000,3);
+INSERT INTO angajat
+VALUES(11,3,TO_DATE('2002/06/19', 'yyyy/mm/dd'),2000,4);
+INSERT INTO angajat
+VALUES(12,3,TO_DATE('2000/04/18', 'yyyy/mm/dd'),2000,5);
+INSERT INTO angajat
+VALUES(13,3,TO_DATE('1996/10/19', 'yyyy/mm/dd'),2500,6);
+
+INSERT INTO bibliotecar
+VALUES(11);
+INSERT INTO bibliotecar
+VALUES(12);
+INSERT INTO bibliotecar
+VALUES(13);
+
+INSERT INTO istorie_joburi
+VALUES(2,8,TO_DATE('1997/06/18', 'yyyy/mm/dd'),TO_DATE('1999/09/18', 'yyyy/mm/dd'));
+INSERT INTO istorie_joburi
+VALUES(3,8,TO_DATE('1999/09/19', 'yyyy/mm/dd'),TO_DATE('2001/01/20', 'yyyy/mm/dd'));
+INSERT INTO istorie_joburi
+VALUES(1,10,TO_DATE('1999/03/03', 'yyyy/mm/dd'),TO_DATE('2000/04/15', 'yyyy/mm/dd'));
+
+INSERT INTO istorie_permise
+VALUES(4,4,TO_DATE('2019/10/05', 'yyyy/mm/dd'));
+INSERT INTO istorie_permise
+VALUES(5,5,TO_DATE('2017/10/06', 'yyyy/mm/dd'));
+INSERT INTO istorie_permise
+VALUES(3,3,TO_DATE('2019/11/30', 'yyyy/mm/dd'));
+INSERT INTO istorie_permise
+VALUES(17,14,TO_DATE('2019/10/07', 'yyyy/mm/dd'));
+INSERT INTO istorie_permise
+VALUES(18,15,TO_DATE('2019/10/07', 'yyyy/mm/dd'));
+
+
+INSERT INTO imprumuta
+VALUES(3,1,TO_DATE('2019/12/21', 'yyyy/mm/dd'),TO_DATE('2020/02/21', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(3,2,TO_DATE('2020/04/03', 'yyyy/mm/dd'),TO_DATE('2020/05/15', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(4,1,TO_DATE('2019/11/11', 'yyyy/mm/dd'),TO_DATE('2019/12/21', 'yyyy/mm/dd'));
+INSERT INTO imprumuta 
+VALUES(5,3,TO_DATE('2017/10/13', 'yyyy/mm/dd'),TO_DATE('2017/12/01', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(5,4,TO_DATE('2017/12/02', 'yyyy/mm/dd'),TO_DATE('2018/01/03', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(8,5,TO_DATE('2001/07/22', 'yyyy/mm/dd'),TO_DATE('2001/09/03', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(9,5,TO_DATE('1997/06/21', 'yyyy/mm/dd'),TO_DATE('1997/08/03', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(7,1,TO_DATE('2016/10/04', 'yyyy/mm/dd'),TO_DATE('2016/11/05', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(7,2,TO_DATE('2016/11/12', 'yyyy/mm/dd'),TO_DATE('2016/12/31', 'yyyy/mm/dd'));
+INSERT INTO imprumuta
+VALUES(7,3,TO_DATE('2016/12/01', 'yyyy/mm/dd'),TO_DATE('2016/12/23', 'yyyy/mm/dd'));
+
+INSERT INTO da
+VALUES(11,1,1);
+INSERT INTO da
+VALUES(12,2,2);
+INSERT INTO da
+VALUES(11,3,3);
+INSERT INTO da
+VALUES(12,4,4);
+INSERT INTO da
+VALUES(11,5,5);
+INSERT INTO da
+VALUES(12,6,6);
+INSERT INTO da
+VALUES(11,7,8);
+INSERT INTO da
+VALUES(11,9,11);
+INSERT INTO da
+VALUES(12,10,12);
+INSERT INTO da
+VALUES(11,11,4);
+INSERT INTO da
+VALUES(12,12,5);
+INSERT INTO da
+VALUES(12,13,3);
+INSERT INTO da
+VALUES(11,14,7);
+INSERT INTO da
+VALUES(12,15,10);
+INSERT INTO da
+VALUES(13,16,13);
+INSERT INTO da
+VALUES(13,17,14);
+INSERT INTO da
+VALUES(13,18,15);
+INSERT INTO da
+VALUES(13,19,14);
+INSERT INTO da
+VALUES(13,20,15);
+
+
+--6.Afisati numele si prenumele persoanelor specificand pentru fiecare cartile imprumutate
+
+
+CREATE OR REPLACE PROCEDURE carti IS 
+    TYPE fname IS TABLE OF persoana.nume%TYPE;
+    fn fname;
+    TYPE lname IS TABLE OF persoana.prenume%TYPE;
+    ln lname;
+    TYPE title IS TABLE OF carte.titlu%TYPE;
+    tt title;
+    fst NUMBER:=0;
+    nrord NUMBER;
+    currname persoana.nume%TYPE;
+BEGIN
+    SELECT nume,prenume,titlu BULK COLLECT INTO fn,ln,tt
+    FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+                    JOIN carte c on (c.id_carte=i.id_carte)
+    ORDER BY nume,prenume,titlu;
+    FOR i IN fn.FIRST..fn.LAST LOOP
+        IF fst=0 OR fn(i)<>currname THEN
+             DBMS_OUTPUT.NEW_LINE();
+	     DBMS_OUTPUT.NEW_LINE();
+             DBMS_OUTPUT.PUT_LINE(fn(i)||' '||ln(i));
+             DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+             nrord:=1;
+             fst:=1;
+             currname:=fn(i);
+             DBMS_OUTPUT.PUT_LINE(nrord||'.'||tt(i));
+        ELSE
+             nrord:=nrord+1;
+             DBMS_OUTPUT.PUT_LINE(nrord||'.'||tt(i));
+        END IF;
+    END LOOP;
+    SELECT nume,prenume BULK COLLECT INTO fn,ln
+    FROM persoana
+    WHERE (nume,prenume) NOT IN
+    (SELECT nume,prenume
+    FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+                    JOIN carte c on (c.id_carte=i.id_carte));
+    FOR i IN fn.FIRST..fn.LAST LOOP
+          DBMS_OUTPUT.NEW_LINE();
+	  DBMS_OUTPUT.NEW_LINE();
+          DBMS_OUTPUT.PUT_LINE(fn(i)||' '||ln(i));
+          DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+          nrord:=1;
+          DBMS_OUTPUT.PUT_LINE('Nu a imprumutat carti.');
+    END LOOP;
+END carti;
+/
+
+EXECUTE carti;
+
+
+--7.Acelasi exercitiu
+
+CREATE OR REPLACE PROCEDURE carti2 IS 
+    TYPE trei IS RECORD(fn persoana.nume%TYPE,
+                        ln persoana.prenume%TYPE,
+                        tt carte.titlu%TYPE);
+    TYPE doi IS RECORD(fn persoana.nume%TYPE,
+                        ln persoana.prenume%TYPE);
+    t trei;
+    d doi;
+    fst NUMBER:=0;
+    nrord NUMBER;
+    currname persoana.nume%TYPE;
+    CURSOR c IS
+         SELECT nume,prenume,titlu
+         FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+                    JOIN carte c on (c.id_carte=i.id_carte)
+         ORDER BY nume,prenume,titlu;
+    CURSOR e IS
+         SELECT nume,prenume
+         FROM persoana
+         WHERE (nume,prenume) NOT IN
+         (SELECT nume,prenume
+         FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+                    JOIN carte c on (c.id_carte=i.id_carte));
+BEGIN
+   OPEN c;
+   LOOP
+         FETCH c into t;
+         EXIT WHEN c%NOTFOUND;
+         IF fst=0 OR t.fn<>currname THEN
+             DBMS_OUTPUT.NEW_LINE();
+	     DBMS_OUTPUT.NEW_LINE();
+             DBMS_OUTPUT.PUT_LINE(t.fn||' '||t.ln);
+             DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+             nrord:=1;
+             fst:=1;
+             currname:=t.fn;
+             DBMS_OUTPUT.PUT_LINE(nrord||'.'||t.tt);
+        ELSE
+             nrord:=nrord+1;
+             DBMS_OUTPUT.PUT_LINE(nrord||'.'||t.tt);
+        END IF;
+   END LOOP;
+   CLOSE c;
+   OPEN e;
+   LOOP
+        FETCH e INTO d;
+        EXIT WHEN e%NOTFOUND;
+        DBMS_OUTPUT.NEW_LINE();
+	DBMS_OUTPUT.NEW_LINE();
+        DBMS_OUTPUT.PUT_LINE(d.fn||' '||d.ln);
+        DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+        nrord:=1;
+        DBMS_OUTPUT.PUT_LINE('Nu a imprumutat carti.');
+   END LOOP;
+   CLOSE e;
+END carti2;
+/
+
+EXECUTE carti2;
+         
+
+--8.Sa se afiseze numele bibliotecarului care a dat permis unei persoane citite de la tastatura(BIBLIOTECAR,DA,STUDENT).
+
+CREATE OR REPLACE FUNCTION perm
+      (num  persoana.prenume%TYPE)
+RETURN persoana.prenume%TYPE IS
+      rez persoana.prenume%TYPE; 
+      nr NUMBER;
+BEGIN
+      SELECT COUNT(*)
+      INTO nr
+      FROM persoana
+      WHERE prenume=num;
+
+      IF nr>1 THEN  RAISE_APPLICATION_ERROR(-20002,'Exista mai multe persoane cu numele specificat.');
+      ELSIF nr=0 THEN  RAISE_APPLICATION_ERROR(-20003,'Nu exista persoane cu numele specificat.');
+      ELSE
+          SELECT prenume 
+          INTO rez
+          FROM persoana
+          WHERE id_persoana IN
+          (SELECT id_bibliotecar
+          FROM da
+          WHERE id_persoana IN
+          (SELECT id_persoana
+          FROM persoana
+          WHERE prenume=num));
+          RETURN rez;
+     END IF;
+EXCEPTION
+      WHEN TOO_MANY_ROWS THEN RAISE_APPLICATION_ERROR(-20000,'Persoana cautata a primit permise de la mai multi bibliotecari.');
+      WHEN NO_DATA_FOUND THEN RAISE_APPLICATION_ERROR(-20001,'Persoana cautata nu a primit permis.');  
+END perm;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||perm('Daniel')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||perm('Cecilia')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||perm('Ioana')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||perm('Marcela')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||perm('Marius')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||perm('Cineva')||'.');
+END;
+/
+
+
+--9.Sa se afiseze numele ,prenumele si data de eliberare a permisului curent pentru studentii care au imprumutat o carte citita de la tastatura si au pierdut permise pana acum.
+
+CREATE OR REPLACE PROCEDURE stud (title carte.titlu%TYPE)IS
+   nr NUMBER:=0;
+   existenta NUMBER;
+   CURSOR c IS
+       SELECT nume,prenume,data_eliberare
+       FROM persoana p JOIN student s on (p.id_persoana=s.id_persoana)
+                       JOIN permis pm on (p.cod_permis=pm.cod_permis)
+                       JOIN imprumuta im on (im.id_persoana=p.id_persoana)
+                       JOIN carte c on (im.id_carte=c.id_carte)
+       WHERE titlu=title AND p.id_persoana IN (SELECT id_persoana
+                                               FROM istorie_permise);                         
+BEGIN
+  SELECT COUNT(titlu)
+  INTO existenta
+  FROM carte
+  WHERE titlu=title;
+  IF existenta=1 THEN
+      FOR i IN c LOOP
+          EXIT WHEN c%NOTFOUND;
+          nr:=nr+1;
+          DBMS_OUTPUT.PUT_LINE('Studentul '||i.nume||' '||i.prenume||' are permisul curent eliberat la data de '||TO_CHAR(i.data_eliberare,'Month DD, YYYY'));
+      END LOOP;
+      IF nr=0 THEN  
+          RAISE_APPLICATION_ERROR(-20000,'Nu s-au gasit studenti pentru cartea specificata.');
+      END IF;
+  ELSIF existenta=0 THEN 
+      RAISE_APPLICATION_ERROR(-20001,'Nu exista cartea specificata in biblioteca.');
+  ELSE
+      RAISE_APPLICATION_ERROR(-20002,'Exista mai multe carti cu acest titlu in biblioteca.');
+  END IF;
+END stud;
+/
+
+EXECUTE stud('Structuri de date in Python');
+EXECUTE stud('Latici si algebre booleene');
+EXECUTE stud('Introducere in statistica');
+EXECUTE stud('Structuri in Java');
+EXECUTE stud('Despre arta recoltarii capsunilor');
+
+--10.Operatii LMD doar in programul de lucru
+
+
+CREATE OR REPLACE TRIGGER program BEFORE INSERT OR DELETE OR UPDATE ON imprumuta
+BEGIN
+  IF (TO_CHAR(SYSDATE,'D') = 1) OR (TO_CHAR(SYSDATE,'D') = 7) OR (TO_CHAR(SYSDATE,'HH24') NOT BETWEEN 8 AND 16) THEN 
+     IF INSERTING THEN RAISE_APPLICATION_ERROR(-20001,'Inserarea in tabeleste permisa doar in timpul programului de lucru!');
+     ELSIF DELETING THEN RAISE_APPLICATION_ERROR(-20002,'Stergerea din tabel este permisa doar in timpul programului de lucru!');
+     ELSE RAISE_APPLICATION_ERROR(-20003,'Actualizarile in tabel sunt permise doar in timpul programului de lucru!');
+     END IF;
+  END IF;
+END;
+/
+
+INSERT INTO imprumuta
+VALUES(3,3,TO_DATE('2019/12/21', 'yyyy/mm/dd'),TO_DATE('2020/02/21', 'yyyy/mm/dd'));
+
+
+
+--11.Acest triger nu permite ca un student sa ramana dator de returnare cu mai mult de 2 carti imprumutate.
+
+CREATE OR REPLACE PACKAGE pachet
+AS
+   TYPE tip_rec IS RECORD (id imprumuta.id_persoana%TYPE,
+                           nr NUMBER(3));
+   TYPE tip_ind IS TABLE OF tip_rec INDEX BY PLS_INTEGER;
+   t tip_ind;
+   contor NUMBER(3) := 0;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trig_11_comanda BEFORE INSERT ON imprumuta
+BEGIN
+   pachet.contor := 0;
+   SELECT id_persoana,COUNT(*) BULK COLLECT INTO pachet.t
+   FROM   imprumuta
+   WHERE  data_returnare IS NULL
+   GROUP BY id_persoana;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trig_11_linie BEFORE INSERT ON imprumuta FOR EACH ROW 
+BEGIN
+    FOR i in 1..pachet.t.last LOOP
+       IF pachet.t(i).id = :NEW.id_persoana AND pachet.t(i).nr + pachet.contor>=2 THEN 
+          RAISE_APPLICATION_ERROR(-20000,'A imprumutat limita de carti disponibile.Pentru a imprumuta din nou trebuie sa returneza carti.');
+       END IF;
+    END LOOP;
+    pachet.contor := pachet.contor+1;
+END;
+/
+
+
+
+INSERT INTO imprumuta
+VALUES(8,1,TO_DATE('2002/01/01', 'yyyy/mm/dd'),null);
+INSERT INTO imprumuta
+VALUES(8,2,TO_DATE('2002/01/02', 'yyyy/mm/dd'),null);
+INSERT INTO imprumuta
+VALUES(8,3,TO_DATE('2002/01/03', 'yyyy/mm/dd'),null);
+UPDATE imprumuta
+SET data_returnare=TO_DATE('2002/01/06', 'yyyy/mm/dd')
+WHERE id_persoana=8 and id_carte=1;
+INSERT INTO imprumuta
+VALUES(8,3,TO_DATE('2002/01/07', 'yyyy/mm/dd'),null);
+
+
+
+--12
+
+CREATE TABLE gestiune2(eveniment VARCHAR2(20),
+                      tip_obiect_referit    VARCHAR2(30),
+                      nume_obiect_referit  VARCHAR2(30),
+                      data TIMESTAMP(3));
+
+CREATE OR REPLACE TRIGGER audit2 AFTER CREATE OR DROP OR ALTER ON SCHEMA
+BEGIN
+  INSERT INTO gestiune2
+  VALUES (SYS.SYSEVENT, SYS.DICTIONARY_OBJ_TYPE,SYS.DICTIONARY_OBJ_NAME, SYSTIMESTAMP(3));
+END;
+/
+
+CREATE TABLE tabel (coloana_1 number(2));
+ALTER TABLE tabel 
+ADD (coloana_2 number(2));
+INSERT INTO tabel 
+VALUES (1,2);
+CREATE INDEX ind_tabel ON tabel(coloana_1);
+SELECT * FROM gestiune2
+
+--13.
+
+CREATE OR REPLACE PACKAGE wow AS
+
+	PROCEDURE carti;
+	PROCEDURE carti2;
+	
+	FUNCTION perm
+		  (num  persoana.prenume%TYPE)
+	RETURN persoana.prenume%TYPE;
+	
+	PROCEDURE stud (title carte.titlu%TYPE);
+	
+END wow;
+/
+
+CREATE OR REPLACE PACKAGE BODY wow IS
+
+
+    PROCEDURE carti IS 
+		TYPE fname IS TABLE OF persoana.nume%TYPE;
+		fn fname;
+		TYPE lname IS TABLE OF persoana.prenume%TYPE;
+		ln lname;
+		TYPE title IS TABLE OF carte.titlu%TYPE;
+		tt title;
+		fst NUMBER:=0;
+		nrord NUMBER;
+		currname persoana.nume%TYPE;
+	BEGIN
+		SELECT nume,prenume,titlu BULK COLLECT INTO fn,ln,tt
+		FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+						JOIN carte c on (c.id_carte=i.id_carte)
+		ORDER BY nume,prenume,titlu;
+		FOR i IN fn.FIRST..fn.LAST LOOP
+			IF fst=0 OR fn(i)<>currname THEN
+				 DBMS_OUTPUT.NEW_LINE();
+			 DBMS_OUTPUT.NEW_LINE();
+				 DBMS_OUTPUT.PUT_LINE(fn(i)||' '||ln(i));
+				 DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+				 nrord:=1;
+				 fst:=1;
+				 currname:=fn(i);
+				 DBMS_OUTPUT.PUT_LINE(nrord||'.'||tt(i));
+			ELSE
+				 nrord:=nrord+1;
+				 DBMS_OUTPUT.PUT_LINE(nrord||'.'||tt(i));
+			END IF;
+		END LOOP;
+		SELECT nume,prenume BULK COLLECT INTO fn,ln
+		FROM persoana
+		WHERE (nume,prenume) NOT IN
+		(SELECT nume,prenume
+		FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+						JOIN carte c on (c.id_carte=i.id_carte));
+		FOR i IN fn.FIRST..fn.LAST LOOP
+			  DBMS_OUTPUT.NEW_LINE();
+		  DBMS_OUTPUT.NEW_LINE();
+			  DBMS_OUTPUT.PUT_LINE(fn(i)||' '||ln(i));
+			  DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+			  nrord:=1;
+			  DBMS_OUTPUT.PUT_LINE('Nu a imprumutat carti.');
+		END LOOP;
+	END carti;
+	
+	
+	PROCEDURE carti2 IS 
+		TYPE trei IS RECORD(fn persoana.nume%TYPE,
+				    ln persoana.prenume%TYPE,
+				    tt carte.titlu%TYPE);
+		TYPE doi IS RECORD(fn persoana.nume%TYPE,
+				  ln persoana.prenume%TYPE);
+		t trei;
+		d doi;
+		fst NUMBER:=0;
+		nrord NUMBER;
+		currname persoana.nume%TYPE;
+		CURSOR c IS
+			 SELECT nume,prenume,titlu
+			 FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+						JOIN carte c on (c.id_carte=i.id_carte)
+			 ORDER BY nume,prenume,titlu;
+		CURSOR e IS
+			 SELECT nume,prenume
+			 FROM persoana
+			 WHERE (nume,prenume) NOT IN
+			 (SELECT nume,prenume
+			 FROM persoana p JOIN imprumuta i on (i.id_persoana=p.id_persoana)
+						JOIN carte c on (c.id_carte=i.id_carte));
+	BEGIN
+	   OPEN c;
+	   LOOP
+			 FETCH c into t;
+			 EXIT WHEN c%NOTFOUND;
+			 IF fst=0 OR t.fn<>currname THEN
+				 DBMS_OUTPUT.NEW_LINE();
+			 DBMS_OUTPUT.NEW_LINE();
+				 DBMS_OUTPUT.PUT_LINE(t.fn||' '||t.ln);
+				 DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+				 nrord:=1;
+				 fst:=1;
+				 currname:=t.fn;
+				 DBMS_OUTPUT.PUT_LINE(nrord||'.'||t.tt);
+			ELSE
+				 nrord:=nrord+1;
+				 DBMS_OUTPUT.PUT_LINE(nrord||'.'||t.tt);
+			END IF;
+	   END LOOP;
+	   CLOSE c;
+	   OPEN e;
+	   LOOP
+			FETCH e INTO d;
+			EXIT WHEN e%NOTFOUND;
+			DBMS_OUTPUT.NEW_LINE();
+		DBMS_OUTPUT.NEW_LINE();
+			DBMS_OUTPUT.PUT_LINE(d.fn||' '||d.ln);
+			DBMS_OUTPUT.PUT_LINE('_ _ _ _ _ _ _ _ _ _');
+			nrord:=1;
+			DBMS_OUTPUT.PUT_LINE('Nu a imprumutat carti.');
+	   END LOOP;
+	   CLOSE e;
+	END carti2;
+	
+	
+	FUNCTION perm
+		  (num  persoana.prenume%TYPE)
+	RETURN persoana.prenume%TYPE IS
+		  rez persoana.prenume%TYPE; 
+		  nr NUMBER;
+	BEGIN
+		  SELECT COUNT(*)
+		  INTO nr
+		  FROM persoana
+		  WHERE prenume=num;
+
+		  IF nr>1 THEN  RAISE_APPLICATION_ERROR(-20002,'Exista mai multe persoane cu numele specificat.');
+		  ELSIF nr=0 THEN  RAISE_APPLICATION_ERROR(-20003,'Nu exista persoane cu numele specificat.');
+		  ELSE
+			  SELECT prenume 
+			  INTO rez
+			  FROM persoana
+			  WHERE id_persoana IN
+			  (SELECT id_bibliotecar
+			  FROM da
+			  WHERE id_persoana IN
+			  (SELECT id_persoana
+			  FROM persoana
+			  WHERE prenume=num));
+			  RETURN rez;
+		 END IF;
+	EXCEPTION
+		  WHEN TOO_MANY_ROWS THEN RAISE_APPLICATION_ERROR(-20000,'Persoana cautata a primit permise de la mai multi bibliotecari.');
+		  WHEN NO_DATA_FOUND THEN RAISE_APPLICATION_ERROR(-20001,'Persoana cautata nu a primit permis.');  
+	END perm;
+	
+	
+	PROCEDURE stud (title carte.titlu%TYPE)IS
+	   nr NUMBER:=0;
+	   existenta NUMBER;
+	   CURSOR c IS
+		   SELECT nume,prenume,data_eliberare
+		   FROM persoana p JOIN student s on (p.id_persoana=s.id_persoana)
+						   JOIN permis pm on (p.cod_permis=pm.cod_permis)
+						   JOIN imprumuta im on (im.id_persoana=p.id_persoana)
+						   JOIN carte c on (im.id_carte=c.id_carte)
+		   WHERE titlu=title AND p.id_persoana IN (SELECT id_persoana
+												   FROM istorie_permise);                         
+	BEGIN
+	  SELECT COUNT(titlu)
+	  INTO existenta
+	  FROM carte
+	  WHERE titlu=title;
+	  IF existenta=1 THEN
+		  FOR i IN c LOOP
+			  EXIT WHEN c%NOTFOUND;
+			  nr:=nr+1;
+			  DBMS_OUTPUT.PUT_LINE('Studentul '||i.nume||' '||i.prenume||' are permisul curent eliberat la data de '||TO_CHAR(i.data_eliberare,'Month DD, YYYY'));
+		  END LOOP;
+		  IF nr=0 THEN  
+			  RAISE_APPLICATION_ERROR(-20000,'Nu s-au gasit studenti pentru cartea specificata.');
+		  END IF;
+	  ELSIF existenta=0 THEN 
+		  RAISE_APPLICATION_ERROR(-20001,'Nu exista cartea specificata in biblioteca.');
+	  ELSE
+		  RAISE_APPLICATION_ERROR(-20002,'Exista mai multe carti cu acest titlu in biblioteca.');
+	  END IF;
+	END stud;
+	
+
+END wow;
+/ 
+
+EXECUTE wow.carti;
+EXECUTE wow.carti2;
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||wow.perm('Daniel')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||wow.perm('Cecilia')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||wow.perm('Ioana')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||wow.perm('Marcela')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||wow.perm('Marius')||'.');
+END;
+/
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Bibliotecarul cautat este '||wow.perm('Cineva')||'.');
+END;
+/
+
+EXECUTE wow.stud('Structuri de date in Python');
+EXECUTE wow.stud('Latici si algebre booleene');
+EXECUTE wow.stud('Introducere in statistica');
+EXECUTE wow.stud('Structuri in Java');
+EXECUTE wow.stud('Despre arta recoltarii capsunilor');
+
+
+--14
+
+CREATE OR REPLACE PACKAGE ex14 AS
+
+    TYPE pers IS RECORD (nume persoana.nume%TYPE,
+                            prenume persoana.prenume%TYPE,
+			                nr_carti_imprumutate NUMBER(2));
+
+    TYPE persoane IS TABLE OF pers;
+
+    PROCEDURE afisare; 
+    
+
+END ex14;
+/
+
+CREATE OR REPLACE PACKAGE BODY ex14 IS
+    
+   PROCEDURE afisare IS        
+        x persoane;
+   BEGIN
+        SELECT nume,prenume,
+               (SELECT COUNT(*)
+                FROM imprumuta
+                WHERE id_persoana=s.id_persoana)
+        BULK COLLECT INTO x
+        FROM persoana s;
+
+        FOR i in 1..x.LAST LOOP
+             DBMS_OUTPUT.PUT_LINE('Nume:'||x(i).nume);
+             DBMS_OUTPUT.PUT_LINE('Prenume:'||x(i).prenume);
+             DBMS_OUTPUT.PUT_LINE('Nr.carti imprumutate:'||x(i).nr_carti_imprumutate);
+        END LOOP;
+        
+   END afisare;
+
+END ex14;
+/
+
+execute ex14.afisare
